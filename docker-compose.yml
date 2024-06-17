@@ -1,0 +1,20 @@
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    hostname: rabbitmq-service
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  cloudburst-dispatch:
+    build: .
+    environment:
+      - KUBECONFIG=/root/.kube/config
+      - BROKER_URL=amqp://guest:guest@rabbitmq-service:5672
+      - QUEUE=job1
+      - CONTAINER_NAME=cloudburst1
+      - CONTAINER_URL=us-west2-docker.pkg.dev/hip-field-293822/cloudburst1:latest
+    volumes:
+      - ~/.kube/config:/root/.kube/config
+    depends_on:
+      - rabbitmq
