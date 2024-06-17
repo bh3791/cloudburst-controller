@@ -15,7 +15,7 @@ spec:
       serviceAccountName: app-service-account
       containers:
         - name: cloudburst-controller
-          image: us-west2-docker.pkg.dev/hip-field-293822/cloudburst-service/cloudburst-controller
+          image: us-west2-docker.pkg.dev/hip-field-293822/cloudburst-controller/cloudburst-controller
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq-service
