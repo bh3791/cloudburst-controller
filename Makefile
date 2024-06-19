@@ -1,13 +1,12 @@
 DEPLOYMENT_ID=cloudburst-controller
 
-AWS_ID=$(AWS_ID) # your AWS account ID here, if using AWS. Using an ENV variable
-AWS_REGION=$(AWS_REGION) # your preferred AWS region here, if using AWS. Using an ENV variable
+#AWS_ID=$(AWS_ID) # your AWS account ID here, if using AWS. Using an ENV variable
+#AWS_REGION=$(AWS_REGION) # your preferred AWS region here, if using AWS. Using an ENV variable
+#GAR_REPO_PREFIX=$(GAR_REPO_PREFIX) # e.g. us-west2-docker.pkg.dev. Using an ENV variable
+#GAR_PROJECT_ID=$(GAR_PROJECT_ID) # your Google Cloud Project ID, if using. An ENV variable
 
 ECR_REPO_ID=$(DEPLOYMENT_ID)
 ECR_REPO_URL=$(AWS_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
-
-GAR_REPO_PREFIX=$(GAR_REPO_PREFIX) # e.g. us-west2-docker.pkg.dev. Using an ENV variable
-GAR_PROJECT_ID=$(GAR_PROJECT_ID) # your Google Cloud Project ID, if using. An ENV variable
 
 build:
 	docker compose build $(DEPLOYMENT_ID)
@@ -46,18 +45,18 @@ delete-mq:
 	kubectl delete -f deployment/rabbitmq-service.yaml
 	kubectl delete -f deployment/rabbitmq-controller.yaml
 
-init-disp:
+init-controller:
 	kubectl apply -f deployment/app-deployment.yaml
 
-delete-disp:
+delete-controller:
 	kubectl delete -f deployment/app-deployment.yaml
 
 jump-pod:
 	echo kubectl run jump-1 -it --rm --image=us-west2-docker.pkg.dev/$(GCR_PROJECT_ID)/$(DEPLOYMENT_ID)/$(DEPLOYMENT_ID) bash
 
-apply: push-gar init-disp post-msg
+apply: push-gar init-controller post-msg
 
-re-apply: delete-disp apply
+re-apply: delete-controller apply
 
 post-msg:
 	python mq_pub.py -queue job1 -broker_url amqp://guest:guest@localhost:31672 -work_item 23234
@@ -67,3 +66,6 @@ monitor-disp:
 
 monitor-cb:
 	kubectl logs -l app=cloudburst --follow
+
+setup: init-mq push-gar init-controller
+

@@ -47,7 +47,7 @@ parser.add_argument(
     help="The broker to pass in, if not check BROKER_URL env var")
 parser.add_argument(
     "-debug",
-    dest="is_debug",
+    dest="debug",
     action="store_true",
     help="The broker to pass in, if not check BROKER_URL env var")
 
@@ -62,6 +62,13 @@ batch_v1 = client.BatchV1Api()
 
 # Function to create a Kubernetes job
 def create_kubernetes_job(message):
+
+    # defaults for cpu and memory resources requested for each job
+    cpu_request = "250m"
+    memory_request = "64Mi"
+    cpu_limit = "500m"
+    memory_limit = "128Mi"
+
     # load up the environment variables
     my_env = []
     b_named = False
@@ -89,7 +96,11 @@ def create_kubernetes_job(message):
                         client.V1Container(
                             name=args.container_name,
                             image=args.container_url,
-                            env=my_env
+                            env=my_env,
+                            resources=client.V1ResourceRequirements(
+                                requests={"cpu": cpu_request, "memory": memory_request},
+                                limits={"cpu": cpu_limit, "memory": memory_limit}
+                            )                        
                         )
                     ],
                     restart_policy="Never"
@@ -123,12 +134,13 @@ def get_running_jobs():
 def callback(ch, method, properties, body):
     try:
         message = json.loads(body)
-        # print(f"received message: {message}")
+        if args.debug:
+            print(f"received message: {message}")
 
         # throttle the number of currently running jobs, if max_concurrent_jobs is not None
-        if args.max_concurrent_jobs is not None:
+        if args.max_concurrent_jobs is not None and args.max_concurrent_jobs > 0:
             while get_running_jobs() >= args.max_concurrent_jobs:
-                if args.is_debug:
+                if args.debug:
                     print(f"Maximum concurrent jobs ({args.max_concurrent_jobs}) running, waiting...")
                 time.sleep(5)  # Wait before checking again
 

@@ -16,6 +16,7 @@ spec:
       containers:
         - name: cloudburst-controller
           image: us-west2-docker.pkg.dev/hip-field-293822/cloudburst-controller/cloudburst-controller
+          imagePullPolicy: IfNotPresent
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq-service
@@ -34,4 +35,11 @@ spec:
             - name: LOCAL_MODE
               value: '0'
             - name: MAX_CONCURRENT_JOBS
-              value: '3'
+              value: '0'
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"

@@ -6,7 +6,7 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-  cloudburst-dispatch:
+  cloudburst-controller:
     build: .
     environment:
       - KUBECONFIG=/root/.kube/config
