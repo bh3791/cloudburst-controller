@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY cloudburst-controller.py .
+COPY cloudburst-job-template.yaml .
 
 # Command to run the application
 CMD ["python", "cloudburst-controller.py", "-debug"]

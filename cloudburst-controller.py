@@ -2,6 +2,8 @@ import json
 import threading
 import time
 import pika
+import yaml
+from string import Template
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 import argparse
@@ -38,7 +40,7 @@ parser.add_argument(
     "-max_concurrent_jobs",
     dest="max_concurrent_jobs",
     type=int,
-    help="The max number of jobs to run concurrently",
+    help="The max number of jobs to run concurrently. This is not recommended, instead k8s can use memory and cpu constraints to manage load",
     default=os.getenv("MAX_CONCURRENT_JOBS"))
 parser.add_argument(
     "-test",
@@ -51,68 +53,68 @@ parser.add_argument(
     action="store_true",
     help="The broker to pass in, if not check BROKER_URL env var")
 
+
+def load_template(template_file):
+    with open(template_file, 'r') as file:
+        template = Template(file.read())
+    return template
+
+
+# attempt to load in-cluster config, or else it's a docker setup
 try:
-    # attempt to load in-cluster config, or else it's a docker setup
     config.load_incluster_config()
 except config.ConfigException:
     config.load_kube_config()
 
+# init the batch API
 batch_v1 = client.BatchV1Api()
 
+# load the YAML job template
+job_template_file = 'cloudburst-job-template.yaml'
+job_template = load_template(job_template_file)
 
-# Function to create a Kubernetes job
+
+def substitute_template(template, variables):
+    substituted_content = template.substitute(variables)
+    return yaml.safe_load(substituted_content)
+
+
 def create_kubernetes_job(message):
-
-    # defaults for cpu and memory resources requested for each job
-    cpu_request = "250m"
-    memory_request = "64Mi"
-    cpu_limit = "500m"
-    memory_limit = "128Mi"
-
-    # load up the environment variables
-    my_env = []
+    # load up the substitution variables
+    my_vars = {}
     b_named = False
     job_name = "x"
+    job_namespace = "default"
+
+    # create the substitution variables based on the request message.
+    # extract the job name and namespace when provided
     for name1, value1 in message.items():
-        if not b_named:
-            # use the first item found to identify the job name
-            # make it unique with a timestamp
+        my_vars[name1.upper()] = value1
+
+        if name1 == "WORK_ITEM":
+            # try to find work_item to identify the job name, make it unique with a timestamp
             job_name = f"job-cb-{value1}-{int(time.time_ns()/1000)}"
+            my_vars["JOB_NAME"] = job_name
             if args.debug:
-                print(f"creating {job_name}")
+                print(f"naming job {job_name} based on {name1}")
             b_named = True
+        elif name1 == "JOB_NAMESPACE":
+            job_namespace = value1
 
-        my_env.append(client.V1EnvVar(name=name1.upper(), value=value1))
+    # name the job something if it was not already named
+    if not b_named:
+        for name1, value1 in message.items():
+            job_name = f"job-cb-{value1}-{int(time.time_ns()/1000)}"
+            my_vars["JOB_NAME"] = job_name
+            if args.debug:
+                print(f"naming job {job_name} based on {name1}")
+                break
 
-    # Define the job
-    job = client.V1Job(
-        api_version="batch/v1",
-        kind="Job",
-        metadata=client.V1ObjectMeta(name=job_name),
-        spec=client.V1JobSpec(
-            template=client.V1PodTemplateSpec(
-                spec=client.V1PodSpec(
-                    containers=[
-                        client.V1Container(
-                            name=args.container_name,
-                            image=args.container_url,
-                            env=my_env,
-                            resources=client.V1ResourceRequirements(
-                                requests={"cpu": cpu_request, "memory": memory_request},
-                                limits={"cpu": cpu_limit, "memory": memory_limit}
-                            )                        
-                        )
-                    ],
-                    restart_policy="Never"
-                )
-            ),
-            backoff_limit=4
-        )
-    )
+    job_manifest = substitute_template(job_template, my_vars)
 
     try:
-        batch_v1.create_namespaced_job(body=job, namespace="default")
-        print(f"Job {job_name} created successfully")
+        batch_v1.create_namespaced_job(body=job_manifest, namespace=job_namespace)
+        print(f"Job {job_name} created successfully in namespace {job_namespace}")
     except ApiException as e:
         print(f"Exception when creating job: {e}")
 
@@ -163,6 +165,7 @@ def start_consuming():
 
 # Main function to start multiple threads
 def main():
+
     threads = []
 
     for _ in range(args.num_threads):

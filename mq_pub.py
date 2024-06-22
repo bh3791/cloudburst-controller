@@ -9,8 +9,12 @@ parser.add_argument(
     "-work_item",
     dest="work_item",
     help="The work item to process",
-    required=True,
-    default="")
+    required=True)
+parser.add_argument(
+    "-namespace",
+    dest="namespace",
+    help="The job namespace to run in",
+    default="default")
 parser.add_argument(
     "-queue",
     dest="queue_name",
@@ -26,8 +30,9 @@ parser.add_argument(
 
 
 def main(args):
-    request = { # put the identifier element first
-        "WORK_ITEM": args.work_item
+    request = {  # put the identifier element first
+        "WORK_ITEM": args.work_item,
+        "JOB_NAMESPACE": args.namespace
     }
     request_str = json.dumps(request)
 
@@ -36,6 +41,7 @@ def main(args):
     channel.queue_declare(queue=args.queue_name)
     channel.basic_publish(exchange='', routing_key=args.queue_name, body=request_str)
     print(f" sent {args.work_item} to: {args.broker_url}/{args.queue_name}")
+
 
 if __name__ == "__main__":
     args = parser.parse_args()

@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${JOB_NAME}
+  # namespace: cloudburst
+  labels:
+    app: cloudburst
+spec:
+  template:
+    metadata:
+      name: cloudburst
+      labels:
+        app: cloudburst
+    spec:
+      containers:
+      - name: cloudburst
+        image: us-west2-docker.pkg.dev/hip-field-293822/cloudburst1/cloudburst1:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: WORK_ITEM
+          value: "${WORK_ITEM}"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      restartPolicy: OnFailure

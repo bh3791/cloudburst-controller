@@ -54,18 +54,31 @@ delete-controller:
 jump-pod:
 	echo kubectl run jump-1 -it --rm --image=us-west2-docker.pkg.dev/$(GCR_PROJECT_ID)/$(DEPLOYMENT_ID)/$(DEPLOYMENT_ID) bash
 
-apply: push-gar init-controller post-msg
+apply: push-gar init-controller apply-policy
 
 re-apply: delete-controller apply
 
 post-msg:
 	python mq_pub.py -queue job1 -broker_url amqp://guest:guest@localhost:31672 -work_item 23234
 
-monitor-disp:
-	kubectl logs -l app=cloudburst-dispatch --follow
+monitor-ctrl:
+	kubectl logs -l app=cloudburst-controller --follow
 
 monitor-cb:
 	kubectl logs -l app=cloudburst --follow
 
-setup: init-mq push-gar init-controller
+setup: init-mq push-gar init-controller apply-policy
+
+apply-policy:
+	# permissions required for using the kubernetes batch job service
+	kubectl apply -f deployment/cluster-role.yaml
+	kubectl apply -f deployment/service-account.yaml
+	kubectl apply -f deployment/cluster-role-binding.yaml
+
+remove-policy:
+	kubectl apply -f deployment/cluster-role-binding.yaml
+	kubectl apply -f deployment/cluster-role.yaml
+	kubectl apply -f deployment/service-account.yaml
+
+remove-all: delete-controller delete-mq remove-policy
 
