@@ -6,6 +6,7 @@ metadata:
   labels:
     app: cloudburst
 spec:
+  ttlSecondsAfterFinished: 3600  # Job will be cleaned up 1 hour after completion
   template:
     metadata:
       name: cloudburst
@@ -26,4 +27,4 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-      restartPolicy: OnFailure
+      restartPolicy: Never  # OnFailure
