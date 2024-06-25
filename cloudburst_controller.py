@@ -8,6 +8,8 @@ from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 import argparse
 import os
+import job_monitor
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -47,6 +49,11 @@ parser.add_argument(
     dest="is_test",
     action="store_true",
     help="The broker to pass in, if not check BROKER_URL env var")
+parser.add_argument(
+    "-no-monitor",
+    dest="no_monitor",
+    action="store_true",
+    help="Disable the job monitor thread which stores status in mariadb")
 parser.add_argument(
     "-debug",
     dest="debug",
@@ -163,8 +170,17 @@ def start_consuming():
     channel.start_consuming()
 
 
+def start_job_monitor_thread():
+    thread = threading.Thread(target=job_monitor.main)
+    thread.daemon = True  # This makes the thread exit when the main program exits
+    thread.start()
+    print("Job monitor background thread started")
+
+
 # Main function to start multiple threads
 def main():
+    if not args.no_monitor:
+        start_job_monitor_thread()
 
     threads = []
 

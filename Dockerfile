@@ -14,8 +14,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
-COPY cloudburst-controller.py .
+COPY cloudburst_controller.py .
+COPY job_monitor.py .
+
+# copy assets
 COPY cloudburst-job-template.yaml .
+# COPY database/job_status.sql .
 
 # Command to run the application
-CMD ["python", "cloudburst-controller.py", "-debug"]
+CMD ["python", "cloudburst_controller.py", "-debug"]

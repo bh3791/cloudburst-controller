@@ -39,11 +39,15 @@ push-gar: build
 
 init-mq:
 	kubectl apply -f deployment/rabbitmq-controller.yaml
-	kubectl apply -f deployment/rabbitmq-service.yaml
 
 delete-mq:
-	kubectl delete -f deployment/rabbitmq-service.yaml
 	kubectl delete -f deployment/rabbitmq-controller.yaml
+
+init-db:
+	kubectl apply -f deployment/mariadb-deployment.yaml
+
+delete-db:
+	kubectl apply -f deployment/mariadb-deployment.yaml
 
 init-controller:
 	kubectl apply -f deployment/app-deployment.yaml
@@ -61,24 +65,26 @@ re-apply: delete-controller apply
 post-msg:
 	python mq_pub.py -queue job1 -broker_url amqp://guest:guest@localhost:31672 -work_item 23234
 
+sql-conn:
+	mysql -h 127.0.0.1 -P 30306 -uroot -prootpassword exampledb
+
+sql-init:
+	mysql -h 127.0.0.1 -P 30306 -uroot -prootpassword exampledb < database/job_status.sql
+
 monitor-ctrl:
 	kubectl logs -l app=cloudburst-controller --follow
 
 monitor-cb:
 	kubectl logs -l app=cloudburst --follow
 
-setup: init-mq push-gar init-controller apply-policy
+setup: init-mq init-db push-gar init-controller apply-policy sql-init
 
 apply-policy:
 	# permissions required for using the kubernetes batch job service
-	kubectl apply -f deployment/cluster-role.yaml
 	kubectl apply -f deployment/service-account.yaml
-	kubectl apply -f deployment/cluster-role-binding.yaml
 
 remove-policy:
-	kubectl apply -f deployment/cluster-role-binding.yaml
-	kubectl apply -f deployment/cluster-role.yaml
 	kubectl apply -f deployment/service-account.yaml
 
-remove-all: delete-controller delete-mq remove-policy
+remove-all: delete-controller delete-mq delete-db remove-policy
 
