@@ -1,6 +1,6 @@
 # Cloudburst Controller for Kubernetes
 
-The `cloudburst controller` is a container app which runs in kubernetes. The controller has a simple job, it listens to a rabbitmq queue and creates cloudburst jobs. A client tool (mq_pub.py) is provided to send requests to the rabbitmq channel.
+The `cloudburst controller` is a container app which runs in kubernetes. The controller has a simple job. It listens to a rabbitmq queue and creates cloudburst jobs. A client tool (mq_pub.py) is provided to send requests to the rabbitmq channel.
 
 RabbitMQ is exposed outside the cluster in the rabbitmq-service.yaml for ease of initial implementation and testing with the help of the mq_pub script.
 
