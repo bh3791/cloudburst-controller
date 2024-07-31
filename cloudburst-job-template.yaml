@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: cloudburst
-        image: us-west2-docker.pkg.dev/hip-field-293822/cloudburst1/cloudburst1:latest
+        image: "${CONTAINER_IMAGE}"
         imagePullPolicy: IfNotPresent
         env:
         - name: WORK_ITEM

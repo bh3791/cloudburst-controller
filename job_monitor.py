@@ -1,5 +1,5 @@
 import time
-from kubernetes import client, config
+from kubernetes import client, config, watch
 import mysql.connector
 from mysql.connector import Error
 
@@ -11,27 +11,10 @@ except config.ConfigException:
     config.load_kube_config()
 # load batch API
 batch_v1 = client.BatchV1Api()
+w = watch.Watch()
 
 
-def get_job_status():
-    # Load Kubernetes configuration
-    jobs = batch_v1.list_namespaced_job(namespace='default')
-
-    job_statuses = []
-    for job in jobs.items:
-        job_name = job.metadata.name
-        if job.status.succeeded is not None:
-            status = 'Complete'
-        elif job.status.active is not None:
-            status = 'Running'
-        elif job.status.failed is not None:
-            status = 'Failed'
-        else:
-            status = 'Unknown'
-        job_statuses.append((job_name, status))
-    return job_statuses
-
-def update_mariadb(job_statuses):
+def update_job_status_in_db(job_name, status):
     try:
         connection = mysql.connector.connect(
             host='mariadb',
@@ -39,17 +22,14 @@ def update_mariadb(job_statuses):
             user='exampleuser',
             password='examplepass'
         )
-
         if connection.is_connected():
             cursor = connection.cursor()
-            for job_name, status in job_statuses:
-                cursor.execute("""
-                    INSERT INTO job_status (job_name, status)
-                    VALUES (%s, %s)
-                    ON DUPLICATE KEY UPDATE status=%s
-                """, (job_name, status, status))
+            cursor.execute("""
+                INSERT INTO job_status (job_name, status)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE status=%s
+            """, (job_name, status, status))
             connection.commit()
-
     except Error as e:
         print("Error while connecting to MariaDB", e)
     finally:
@@ -58,12 +38,25 @@ def update_mariadb(job_statuses):
             connection.close()
 
 
+def watch_jobs():
+    for event in w.stream(batch_v1.list_namespaced_job, namespace='default'):
+        job = event['object']
+        job_name = job.metadata.name
+        if job.status.succeeded is not None:
+            status = 'Complete'
+        elif job.status.failed is not None:
+            status = 'Failed'
+        else:
+            status = 'Running'
+
+        print(f"Job {job_name} status: {status}")
+        update_job_status_in_db(job_name, status)
+
+
 def main():
     while True:
         try:
-            job_statuses = get_job_status()
-            update_mariadb(job_statuses)
-            time.sleep(30)
+            watch_jobs()
         except Error as e:
             print("Error in processing loop", e)
 

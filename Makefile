@@ -63,7 +63,7 @@ apply: push-gar init-controller apply-policy
 re-apply: delete-controller apply
 
 post-msg:
-	python mq_pub.py -queue job1 -broker_url amqp://guest:guest@localhost:31672 -work_item 12346
+	python mq_pub.py -queue job1 -broker_url amqp://guest:guest@localhost:31672 -work_item 12345 -count 1
 
 sql-conn:
 	mysql -h 127.0.0.1 -P 30306 -uroot -prootpassword exampledb
@@ -88,3 +88,5 @@ remove-policy:
 
 remove-all: delete-controller delete-mq delete-db remove-policy
 
+clear-jobs:
+	kubectl delete job --field-selector=status.successful=1
