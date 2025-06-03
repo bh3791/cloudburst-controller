@@ -25,7 +25,7 @@ parser.add_argument(
     "-image",
     dest="image",
     help="The container image to run",
-    default="us-west2-docker.pkg.dev/hip-field-293822/haz2406/haz2406:latest")
+    default="bhdockr/cloudburst:latest")
 parser.add_argument(
     "-queue",
     dest="queue_name",
@@ -46,10 +46,13 @@ def main():
     channel.queue_declare(queue=args.queue_name)
 
     for i in range(0, args.count):
+        # the following items will be substituted into the cloudburst-job-template.yaml when received
         request = {  # put the identifier element first
             "WORK_ITEM": args.work_item,
             "JOB_NAMESPACE": args.namespace,
-            "CONTAINER_IMAGE": args.image
+            "CONTAINER_IMAGE": args.image,
+            "STORAGE_TYPE": "directory",
+            "STORAGE_CONTAINER": "/tmp"
         }
         request_str = json.dumps(request)
 
