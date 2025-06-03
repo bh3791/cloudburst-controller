@@ -98,7 +98,7 @@ monitor-ctrl:
 monitor-cb:
 	kubectl logs -l app=cloudburst --follow
 
-setup: init-mq init-db push-gar init-controller apply-policy sql-init
+setup: init-mq init-db init-controller apply-policy sql-init
 
 apply-policy:
 	# permissions required for using the kubernetes batch job service
