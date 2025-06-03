@@ -18,9 +18,9 @@ build:
 
 # Tag the image after building with Docker Compose
 tag:
-	docker tag $(IMAGE_NAME):latest $(IMAGE_NAME):$(VERSION)
-	docker tag $(IMAGE_NAME):latest $(IMAGE_NAME):$(NAMED_VERSION)
-	docker tag $(IMAGE_NAME):latest $(IMAGE_NAME):$(GIT_SHA)
+	docker tag $(IMAGE_NAME) $(IMAGE_NAME):$(VERSION)
+	docker tag $(IMAGE_NAME) $(IMAGE_NAME):$(NAMED_VERSION)
+	docker tag $(IMAGE_NAME) $(IMAGE_NAME):$(GIT_SHA)
 
 # Push Docker images using Docker Compose and manually for tags
 push: build tag

@@ -7,14 +7,23 @@ services:
       - "15672:15672"
 
   cloudburst-controller:
-    build: .
-    environment:
-      - KUBECONFIG=/root/.kube/config
-      - BROKER_URL=amqp://guest:guest@rabbitmq-service:5672
-      - QUEUE=job1
-      - CONTAINER_NAME=cloudburst1
-      - CONTAINER_URL=us-west2-docker.pkg.dev/hip-field-293822/cloudburst1:latest
-    volumes:
-      - ~/.kube/config:/root/.kube/config
-    depends_on:
-      - rabbitmq
+        build:
+            context: .
+            network: host
+            platforms:
+#                - "linux/amd64"
+                - "linux/arm64"
+#        shm_size: '1gb'
+        image: bhdockr/cloudburst-controller
+        stdin_open: true # docker run -i
+        tty: true        # docker run -t
+        environment:
+          - KUBECONFIG=/root/.kube/config
+          - BROKER_URL=amqp://guest:guest@rabbitmq-service:5672
+          - QUEUE=job1
+          - CONTAINER_NAME=cloudburst1
+          - CONTAINER_URL=bhdockr/cloudburst:latest
+        volumes:
+          - ~/.kube/config:/root/.kube/config
+        depends_on:
+          - rabbitmq
