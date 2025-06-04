@@ -21,11 +21,9 @@ spec:
         - name: WORK_ITEM
           value: "${WORK_ITEM}"
         - name: STORAGE_TYPE
-          value: "${CONTAINER_TYPE}"
+          value: "${STORAGE_TYPE}"
         - name: STORAGE_CONTAINER
           value: "${STORAGE_CONTAINER}"
-        - name: WORK_ITEM
-          value: "${WORK_ITEM}"
         resources:
           requests:
             memory: "512Mi"
