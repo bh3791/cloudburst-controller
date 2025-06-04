@@ -58,7 +58,7 @@ parser.add_argument(
     "-debug",
     dest="debug",
     action="store_true",
-    help="The broker to pass in, if not check BROKER_URL env var")
+    help="write out more debug info")
 
 
 def load_template(template_file):
@@ -118,6 +118,8 @@ def create_kubernetes_job(message):
                 break
 
     job_manifest = substitute_template(job_template, my_vars)
+    if args.debug:
+        print(f"DEBUG: job_manifest: {job_manifest}")
 
     try:
         batch_v1.create_namespaced_job(body=job_manifest, namespace=job_namespace)

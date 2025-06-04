@@ -79,7 +79,7 @@ delete-controller:
 jump-pod:
 	echo kubectl run jump-1 -it --rm --image=us-west2-docker.pkg.dev/$(GCR_PROJECT_ID)/$(DEPLOYMENT_ID)/$(DEPLOYMENT_ID) bash
 
-apply: push init-controller apply-policy
+apply: init-controller apply-policy
 
 re-apply: delete-controller apply
 
