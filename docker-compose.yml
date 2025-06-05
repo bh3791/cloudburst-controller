@@ -11,8 +11,8 @@ services:
             context: .
             network: host
             platforms:
-#                - "linux/amd64"
-                - "linux/arm64"
+                - "linux/amd64"
+#                - "linux/arm64"
 #        shm_size: '1gb'
         image: bhdockr/cloudburst-controller
         stdin_open: true # docker run -i
