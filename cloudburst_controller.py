@@ -1,6 +1,8 @@
 import json
 import threading
 import time
+import traceback
+
 import pika
 import yaml
 from string import Template
@@ -126,6 +128,7 @@ def create_kubernetes_job(message):
         print(f"Job {job_name} created successfully in namespace {job_namespace}")
     except ApiException as e:
         print(f"Exception when creating job: {e}")
+        traceback.print_exc()
 
 
 # Retrieve the number of current running and pending jobs
@@ -138,6 +141,7 @@ def get_running_jobs():
         return len(running_jobs)
     except ApiException as e:
         print(f"Exception when listing jobs: {e}")
+        traceback.print_exc()
         return []
 
 
@@ -158,6 +162,7 @@ def callback(ch, method, properties, body):
         create_kubernetes_job(message)
     except (json.JSONDecodeError, KeyError) as e:
         print(f"Failed to process message: {e}")
+        traceback.print_exc()
 
 
 # Function to start consuming messages from RabbitMQ

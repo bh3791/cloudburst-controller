@@ -32,3 +32,11 @@ spec:
             memory: "512Mi"
             cpu: "500m"
       restartPolicy: Never  # OnFailure
+      volumeMounts:
+        - name: my-bind-mount
+          mountPath: /tmp
+    volumes:
+      - name: my-bind-mount
+        hostPath:
+          path: /tmp
+          type: Directory  # or "File", "DirectoryOrCreate", etc.
