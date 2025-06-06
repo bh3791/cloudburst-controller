@@ -51,8 +51,9 @@ def main():
             "WORK_ITEM": args.work_item,
             "JOB_NAMESPACE": args.namespace,
             "CONTAINER_IMAGE": args.image,
-            "STORAGE_TYPE": "directory",
-            "STORAGE_CONTAINER": "/tmp"
+            "STORAGE_TYPE": "network-scp",
+            "STORAGE_CONTAINER": "root@192.168.1.1",
+            "STORAGE_PATH": "x",
         }
         request_str = json.dumps(request)
 

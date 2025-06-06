@@ -24,6 +24,8 @@ spec:
           value: "${STORAGE_TYPE}"
         - name: STORAGE_CONTAINER
           value: "${STORAGE_CONTAINER}"
+        - name: STORAGE_PATH
+          value: "${STORAGE_PATH}"
         resources:
           requests:
             memory: "512Mi"
@@ -33,10 +35,11 @@ spec:
             cpu: "500m"
       restartPolicy: Never  # OnFailure
       volumeMounts:
-        - name: my-bind-mount
-          mountPath: /tmp
-    volumes:
-      - name: my-bind-mount
-        hostPath:
-          path: /tmp
-          type: Directory  # or "File", "DirectoryOrCreate", etc.
+        - name: ssh-key
+          mountPath: /root/.ssh
+          readOnly: true
+      volumes:
+      - name: ssh-key
+        secret:
+          secretName: ssh-key
+          defaultMode: 0600
