@@ -39,8 +39,8 @@ parser.add_argument(
     help = "The storage container/host type",
     default = os.getenv("STORAGE_TYPE"))
 parser.add_argument(
-    "-storage-host",
-    dest="storage_host",
+    "-storage-container",
+    dest="storage_container",
     required=True,
     help="The storage container/host",
     default=os.getenv("STORAGE_CONTAINER"))
