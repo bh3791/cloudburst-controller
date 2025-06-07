@@ -33,6 +33,24 @@ parser.add_argument(
     help="The queue name, if not the QUEUE env var",
     default=os.getenv("QUEUE"))
 parser.add_argument(
+    "-storage-type",
+    dest = "storage_type",
+    required = True,
+    help = "The storage container/host type",
+    default = os.getenv("STORAGE_TYPE"))
+parser.add_argument(
+    "-storage-host",
+    dest="storage_host",
+    required=True,
+    help="The storage container/host",
+    default=os.getenv("STORAGE_CONTAINER"))
+parser.add_argument(
+    "-storage-path",
+    dest = "storage_path",
+    required = True,
+    help = "The storage container/host path",
+    default = os.getenv("STORAGE_PATH"))
+parser.add_argument(
     "-broker_url",
     dest="broker_url",
     required=True,
@@ -51,9 +69,9 @@ def main():
             "WORK_ITEM": args.work_item,
             "JOB_NAMESPACE": args.namespace,
             "CONTAINER_IMAGE": args.image,
-            "STORAGE_TYPE": "network-scp",
-            "STORAGE_CONTAINER": "root@192.168.1.1",
-            "STORAGE_PATH": "x",
+            "STORAGE_TYPE": args.storage_type,
+            "STORAGE_CONTAINER": args.storage_container,
+            "STORAGE_PATH": args.storage_path,
         }
         request_str = json.dumps(request)
 

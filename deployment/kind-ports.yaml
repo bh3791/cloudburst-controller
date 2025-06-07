@@ -1,0 +1,14 @@
+# kind-config.yaml
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 30306  # Must match the NodePort in your service
+    hostPort: 30306       # Access via localhost:30000 on Linux Mint
+    protocol: TCP
+    listenAddress: "0.0.0.0"
+  - containerPort: 31672  # Must match the NodePort in your service
+    hostPort: 31672       # Access via localhost:30000 on Linux Mint
+    protocol: TCP
+    listenAddress: "0.0.0.0"

@@ -5,6 +5,8 @@ VERSION=0.1.1
 NAMED_VERSION=mini-raptor
 GIT_SHA=$(shell git rev-parse --short HEAD)
 
+K8S_IP=127.0.0.1
+
 #AWS_ID=$(AWS_ID) # your AWS account ID here, if using AWS. Using an ENV variable
 #AWS_REGION=$(AWS_REGION) # your preferred AWS region here, if using AWS. Using an ENV variable
 #GAR_REPO_PREFIX=$(GAR_REPO_PREFIX) # e.g. us-west2-docker.pkg.dev. Using an ENV variable
@@ -77,26 +79,29 @@ delete-controller:
 	kubectl delete -f deployment/app-deployment.yaml
 
 jump-pod:
-	echo kubectl run jump-1 -it --rm --image=us-west2-docker.pkg.dev/$(GCR_PROJECT_ID)/$(DEPLOYMENT_ID)/$(DEPLOYMENT_ID) bash
+	echo kubectl run jump-1 -it --rm --image=$(IMAGE_NAME) bash
 
 apply: init-controller apply-policy
 
 re-apply: delete-controller apply
 
 post-msg:
-	python mq_pub.py -queue job1 -broker_url amqp://guest:guest@localhost:31672 -work_item 12345 -count 1
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container bruce@bruce-mint -storage-path /data/ -work_item 12345 -count 1
 
 sql-conn:
-	mysql -h 127.0.0.1 -P 30306 -uroot -prootpassword exampledb
+	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb
 
 sql-init:
-	mysql -h 127.0.0.1 -P 30306 -uroot -prootpassword exampledb < database/job_status.sql
+	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb < database/job_status.sql
 
 monitor-ctrl:
 	kubectl logs -l app=cloudburst-controller --follow
 
 monitor-cb:
 	kubectl logs -l app=cloudburst --follow
+
+kind-init:
+	kind create cluster --config deployment/kind-ports.yaml
 
 setup: init-mq init-db init-controller apply-policy sql-init
 
