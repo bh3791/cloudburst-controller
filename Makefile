@@ -5,7 +5,7 @@ VERSION=0.1.1
 NAMED_VERSION=mini-raptor
 GIT_SHA=$(shell git rev-parse --short HEAD)
 
-K8S_IP=127.0.0.1
+K8S_IP=bruce-mint
 
 #AWS_ID=$(AWS_ID) # your AWS account ID here, if using AWS. Using an ENV variable
 #AWS_REGION=$(AWS_REGION) # your preferred AWS region here, if using AWS. Using an ENV variable
@@ -86,7 +86,7 @@ apply: init-controller apply-policy
 re-apply: delete-controller apply
 
 post-msg:
-	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container bruce@bruce-mint -storage-path /data/ -work_item 12345 -count 1
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container bruce@$(K8S_IP) -storage-path /data -work_item 12345 -count 1
 
 sql-conn:
 	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb
