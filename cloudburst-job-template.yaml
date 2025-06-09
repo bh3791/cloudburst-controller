@@ -33,22 +33,22 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-      restartPolicy: Never  # OnFailure
-      volumeMounts:
-        - name: ssh-key
-          mountPath: /root/.ssh/id_ed25519
-          subPath: id_ed25519
-          readOnly: true
-        - name: ssh-known-hosts
-          mountPath: /root/.ssh/known_hosts
-          subPath: known_hosts
-          readOnly: true
+        volumeMounts:
+          - name: ssh-key
+            mountPath: /root/.ssh/id_ed25519
+            subPath: id_ed25519
+            readOnly: true
+          - name: ssh-known-hosts
+            mountPath: /root/.ssh/known_hosts
+            subPath: known_hosts
+            readOnly: true
       volumes:
-      - name: ssh-key
-        secret:
-          secretName: ssh-key
-          defaultMode: 0400
-      - name: ssh-known-hosts
-        secret:
-          secretName: ssh-known-hosts
-          defaultMode: 0444
+        - name: ssh-key
+          secret:
+            secretName: ssh-key
+            defaultMode: 0400
+        - name: ssh-known-hosts
+          secret:
+            secretName: ssh-known-hosts
+            defaultMode: 0444
+      restartPolicy: Never  # OnFailure
