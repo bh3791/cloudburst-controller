@@ -102,7 +102,9 @@ monitor-cb:
 
 kind-init:
 	kind create cluster --config deployment/kind-ports.yaml
-	kubectl create secret generic ssh-key --from-file=id_ed25519=/home/bruce/.ssh/id_ed25519
+	# the following secrets are used by the cloudburst job template
+	kubectl create secret generic ssh-key --from-file=id_ed25519=$(HOME)/.ssh/id_ed25519
+	kubectl create secret generic ssh-known-hosts --from-file=known_hosts=$(HOME)/.ssh/known_hosts
 
 setup: init-mq init-db init-controller apply-policy sql-init
 
