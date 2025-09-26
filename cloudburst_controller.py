@@ -8,6 +8,7 @@ import yaml
 from string import Template
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
+from prometheus_client import Counter, Gauge, Histogram, start_http_server
 import argparse
 import os
 import job_monitor
@@ -83,6 +84,39 @@ job_template_file = 'cloudburst-job-template.yaml'
 job_template = load_template(job_template_file)
 
 
+METRICS_PORT = int(os.getenv("METRICS_PORT", "8000"))
+QUEUE_METRICS_INTERVAL_SECONDS = int(os.getenv("QUEUE_METRICS_INTERVAL_SECONDS", "5"))
+
+job_creation_counter = Counter(
+    "cloudburst_jobs_created_total",
+    "Total number of Kubernetes Jobs created",
+    ["queue"])
+job_creation_failures = Counter(
+    "cloudburst_job_creation_failures_total",
+    "Number of Kubernetes Job creation attempts that failed",
+    ["queue"])
+job_creation_latency = Histogram(
+    "cloudburst_job_submission_duration_seconds",
+    "Time spent submitting a Job to the Kubernetes API",
+    ["queue"])
+messages_consumed_counter = Counter(
+    "cloudburst_messages_consumed_total",
+    "Total number of RabbitMQ messages consumed and processed",
+    ["queue"])
+running_jobs_gauge = Gauge(
+    "cloudburst_jobs_running",
+    "Current number of Jobs in running or pending state",
+    ["queue"])
+queue_depth_gauge = Gauge(
+    "cloudburst_queue_depth",
+    "Current number of messages waiting in the RabbitMQ queue",
+    ["queue"])
+queue_consumers_gauge = Gauge(
+    "cloudburst_queue_consumers",
+    "Number of active RabbitMQ consumers for the queue",
+    ["queue"])
+
+
 def substitute_template(template, variables):
     substituted_content = template.substitute(variables)
     return yaml.safe_load(substituted_content)
@@ -124,9 +158,12 @@ def create_kubernetes_job(message):
         print(f"DEBUG: job_manifest: {job_manifest}")
 
     try:
-        batch_v1.create_namespaced_job(body=job_manifest, namespace=job_namespace)
+        with job_creation_latency.labels(queue=args.queue_name).time():
+            batch_v1.create_namespaced_job(body=job_manifest, namespace=job_namespace)
+        job_creation_counter.labels(queue=args.queue_name).inc()
         print(f"Job {job_name} created successfully in namespace {job_namespace}")
     except ApiException as e:
+        job_creation_failures.labels(queue=args.queue_name).inc()
         print(f"Exception when creating job: {e}")
         traceback.print_exc()
 
@@ -138,7 +175,9 @@ def get_running_jobs():
         running_jobs = [job for job in jobs.items if job.status.active or (job.status.conditions and any(
             condition.type == "PodScheduled" and condition.status == "True" for condition in job.status.conditions))]
 
-        return len(running_jobs)
+        running_jobs_count = len(running_jobs)
+        running_jobs_gauge.labels(queue=args.queue_name).set(running_jobs_count)
+        return running_jobs_count
     except ApiException as e:
         print(f"Exception when listing jobs: {e}")
         traceback.print_exc()
@@ -160,6 +199,7 @@ def callback(ch, method, properties, body):
                 time.sleep(5)  # Wait before checking again
 
         create_kubernetes_job(message)
+        messages_consumed_counter.labels(queue=args.queue_name).inc()
     except (json.JSONDecodeError, KeyError) as e:
         print(f"Failed to process message: {e}")
         traceback.print_exc()
@@ -184,10 +224,39 @@ def start_job_monitor_thread():
     print("Job monitor background thread started")
 
 
+def queue_depth_monitor():
+    while True:
+        connection = None
+        try:
+            connection = pika.BlockingConnection(pika.URLParameters(args.broker_url))
+            channel = connection.channel()
+            while True:
+                queue_state = channel.queue_declare(queue=args.queue_name, passive=True)
+                queue_depth_gauge.labels(queue=args.queue_name).set(queue_state.method.message_count)
+                queue_consumers_gauge.labels(queue=args.queue_name).set(queue_state.method.consumer_count)
+                time.sleep(QUEUE_METRICS_INTERVAL_SECONDS)
+        except Exception as exc:
+            if args.debug:
+                print(f"Queue depth monitor encountered an error: {exc}")
+            time.sleep(QUEUE_METRICS_INTERVAL_SECONDS)
+        finally:
+            if connection and connection.is_open:
+                try:
+                    connection.close()
+                except Exception:
+                    pass
+
+
 # Main function to start multiple threads
 def main():
+    start_http_server(METRICS_PORT)
+
     if not args.no_monitor:
         start_job_monitor_thread()
+
+    monitor_thread = threading.Thread(target=queue_depth_monitor)
+    monitor_thread.daemon = True
+    monitor_thread.start()
 
     threads = []
 

@@ -46,9 +46,18 @@ spec:
           volumeMounts:
             - name: prometheus-storage
               mountPath: /prometheus
+            - name: prometheus-config
+              mountPath: /etc/prometheus/prometheus.yml
+              subPath: prometheus.yml
       volumes:
         - name: prometheus-storage
           emptyDir: {}
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+            items:
+              - key: prometheus.yml
+                path: prometheus.yml
 ---
 apiVersion: v1
 kind: Service
