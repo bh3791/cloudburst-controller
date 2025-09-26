@@ -5,7 +5,8 @@ VERSION=0.1.1
 NAMED_VERSION=mini-raptor
 GIT_SHA=$(shell git rev-parse --short HEAD)
 
-K8S_IP=localhost
+K8S_IP=bruce-mint
+STORAGE_IP=bruce@bruce-m2.local
 
 #AWS_ID=$(AWS_ID) # your AWS account ID here, if using AWS. Using an ENV variable
 #AWS_REGION=$(AWS_REGION) # your preferred AWS region here, if using AWS. Using an ENV variable
@@ -78,6 +79,12 @@ init-controller:
 delete-controller:
 	kubectl delete -f deployment/app-deployment.yaml
 
+init-prometheus:
+	kubectl apply -f deployment/prometheus-deployment.yaml
+
+delete-prometheus:
+	kubectl delete -f deployment/prometheus-deployment.yaml
+
 jump-pod:
 	echo kubectl run jump-1 -it --rm --image=$(IMAGE_NAME) bash
 
@@ -86,7 +93,7 @@ apply: init-controller apply-policy
 re-apply: delete-controller apply
 
 post-msg:
-	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container bruce@$192.168.1.12 -storage-path /data -work_item 12345 -count 1
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -storage-path /data -work_item 12345 -count 1
 
 sql-conn:
 	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb

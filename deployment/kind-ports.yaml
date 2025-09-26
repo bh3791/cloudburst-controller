@@ -12,3 +12,8 @@ nodes:
     hostPort: 31672       # Access via localhost:31672 from outside cluster
     protocol: TCP
     listenAddress: "0.0.0.0"
+  - containerPort: 30900  # Must match the NodePort in your service
+    hostPort: 30900       # Access via localhost:31672 from outside cluster
+    protocol: TCP
+    listenAddress: "0.0.0.0"
+    
