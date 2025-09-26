@@ -6,7 +6,7 @@ NAMED_VERSION=mini-raptor
 GIT_SHA=$(shell git rev-parse --short HEAD)
 
 K8S_IP=bruce-mint
-STORAGE_IP=bruce@bruce-m2.local
+STORAGE_IP=bruce-mint #bruce@bruce-m2.local
 
 #AWS_ID=$(AWS_ID) # your AWS account ID here, if using AWS. Using an ENV variable
 #AWS_REGION=$(AWS_REGION) # your preferred AWS region here, if using AWS. Using an ENV variable
@@ -86,8 +86,6 @@ init-prometheus:
 	kubectl apply -f deployment/kube-state-metrics.yaml
 	kubectl apply -f deployment/prometheus-deployment.yaml
 
-apply-prometheus: init-prometheus
-
 delete-prometheus:
 	kubectl delete -f deployment/prometheus-deployment.yaml
 	kubectl delete -f deployment/kube-state-metrics.yaml
@@ -115,13 +113,16 @@ monitor-ctrl:
 monitor-cb:
 	kubectl logs -l app=cloudburst --follow
 
-kind-init:
-	kind create cluster --config deployment/kind-ports.yaml
+k3s-init:
+	# kind create cluster --config deployment/kind-ports.yaml
 	# the following secrets are used by the cloudburst job template
 	kubectl create secret generic ssh-key --from-file=id_ed25519=$(HOME)/.ssh/id_ed25519
 	kubectl create secret generic ssh-known-hosts --from-file=known_hosts=$(HOME)/.ssh/known_hosts
 
-setup: init-mq init-db init-controller apply-policy sql-init apply-prometheus
+k3s-delete:
+	sudo /usr/local/bin/k3s-uninstall.sh
+
+setup: init-prometheus init-mq init-db init-controller apply-policy sql-init
 
 apply-policy:
 	# permissions required for using the kubernetes batch job service
