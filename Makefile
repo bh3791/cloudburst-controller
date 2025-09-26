@@ -75,15 +75,23 @@ delete-db:
 
 init-controller:
 	kubectl apply -f deployment/app-deployment.yaml
+	kubectl apply -f deployment/cloudburst-metrics-service.yaml
 
 delete-controller:
+	kubectl delete -f deployment/cloudburst-metrics-service.yaml
 	kubectl delete -f deployment/app-deployment.yaml
 
 init-prometheus:
+	kubectl apply -f deployment/prometheus-configmap.yaml
+	kubectl apply -f deployment/kube-state-metrics.yaml
 	kubectl apply -f deployment/prometheus-deployment.yaml
+
+apply-prometheus: init-prometheus
 
 delete-prometheus:
 	kubectl delete -f deployment/prometheus-deployment.yaml
+	kubectl delete -f deployment/kube-state-metrics.yaml
+	kubectl delete -f deployment/prometheus-configmap.yaml
 
 jump-pod:
 	echo kubectl run jump-1 -it --rm --image=$(IMAGE_NAME) bash
