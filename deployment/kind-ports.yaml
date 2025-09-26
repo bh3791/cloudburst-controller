@@ -10,7 +10,6 @@ kubeadmConfigPatches:
   apiServer:
     certSANs:
       - bruce-mint
-      - 192.168.1.10
 nodes:
 - role: control-plane
   extraPortMappings:
