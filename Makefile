@@ -113,7 +113,7 @@ kind-init:
 	kubectl create secret generic ssh-key --from-file=id_ed25519=$(HOME)/.ssh/id_ed25519
 	kubectl create secret generic ssh-known-hosts --from-file=known_hosts=$(HOME)/.ssh/known_hosts
 
-setup: init-mq init-db init-controller apply-policy sql-init
+setup: init-mq init-db init-controller apply-policy sql-init apply-prometheus
 
 apply-policy:
 	# permissions required for using the kubernetes batch job service
@@ -122,7 +122,7 @@ apply-policy:
 remove-policy:
 	kubectl apply -f deployment/service-account.yaml
 
-remove-all: delete-controller delete-mq delete-db remove-policy
+remove-all: delete-prometheus delete-controller delete-mq delete-db remove-policy
 
 clear-jobs:
 	kubectl delete job --field-selector=status.successful=1
