@@ -4,14 +4,14 @@ metadata:
   name: ${JOB_NAME}
   # namespace: cloudburst
   labels:
-    app: cloudburst
+    app: ${CONTAINER_NAME}
 spec:
   ttlSecondsAfterFinished: 3600  # Job will be cleaned up 1 hour after completion
   template:
     metadata:
-      name: cloudburst
+      name: ${CONTAINER_NAME}
       labels:
-        app: cloudburst
+        app: ${CONTAINER_NAME}
     spec:
       containers:
       - name: cloudburst
