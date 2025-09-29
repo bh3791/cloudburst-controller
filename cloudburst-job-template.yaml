@@ -14,7 +14,7 @@ spec:
         app: ${CONTAINER_NAME}
     spec:
       containers:
-      - name: cloudburst
+      - name: ${CONTAINER_NAME}
         image: "${CONTAINER_IMAGE}"
         imagePullPolicy: Always
         env:
