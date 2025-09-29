@@ -16,7 +16,7 @@ spec:
       containers:
       - name: cloudburst
         image: "${CONTAINER_IMAGE}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         env:
         - name: WORK_ITEM
           value: "${WORK_ITEM}"

@@ -21,7 +21,7 @@ services:
           - KUBECONFIG=/root/.kube/config
           - BROKER_URL=amqp://guest:guest@rabbitmq-service:5672
           - QUEUE=job1
-          - CONTAINER_NAME=cloudburst1
+          - CONTAINER_NAME=cloudburst
           - CONTAINER_URL=bhdockr/cloudburst:latest
         volumes:
           - ~/.kube/config:/root/.kube/config
