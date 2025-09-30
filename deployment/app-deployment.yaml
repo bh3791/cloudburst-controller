@@ -22,7 +22,7 @@ spec:
       containers:
         - name: cloudburst-controller
           image: bhdockr/cloudburst-controller
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq-service

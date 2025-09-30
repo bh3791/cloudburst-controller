@@ -22,6 +22,11 @@ parser.add_argument(
     help="The job namespace to run in",
     default="default")
 parser.add_argument(
+    "-container_name",
+    dest="container_name",
+    help="The container name to run",
+    default="cloudburst")
+parser.add_argument(
     "-image",
     dest="image",
     help="The container image to run",
@@ -68,6 +73,7 @@ def main():
         request = {  # put the identifier element first
             "WORK_ITEM": args.work_item,
             "JOB_NAMESPACE": args.namespace,
+            "CONTAINER_NAME": args.container_name,
             "CONTAINER_IMAGE": args.image,
             "STORAGE_TYPE": args.storage_type,
             "STORAGE_CONTAINER": args.storage_container,
