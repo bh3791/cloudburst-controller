@@ -50,12 +50,6 @@ parser.add_argument(
     help="The storage container/host",
     default=os.getenv("STORAGE_CONTAINER"))
 parser.add_argument(
-    "-storage-path",
-    dest = "storage_path",
-    required = True,
-    help = "The storage container/host path",
-    default = os.getenv("STORAGE_PATH"))
-parser.add_argument(
     "-broker_url",
     dest="broker_url",
     required=True,
@@ -76,8 +70,7 @@ def main():
             "CONTAINER_NAME": args.container_name,
             "CONTAINER_IMAGE": args.image,
             "STORAGE_TYPE": args.storage_type,
-            "STORAGE_CONTAINER": args.storage_container,
-            "STORAGE_PATH": args.storage_path,
+            "STORAGE_CONTAINER": args.storage_container
         }
         request_str = json.dumps(request)
 

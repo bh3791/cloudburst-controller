@@ -58,6 +58,11 @@ parser.add_argument(
     action="store_true",
     help="Disable the job monitor thread which stores status in mariadb")
 parser.add_argument(
+    "-no-k8s",
+    dest="no_k8s",
+    action="store_true",
+    help="Disable the k8s functions")
+parser.add_argument(
     "-debug",
     dest="debug",
     action="store_true",
@@ -230,6 +235,7 @@ def queue_depth_monitor():
         try:
             connection = pika.BlockingConnection(pika.URLParameters(args.broker_url))
             channel = connection.channel()
+            channel.queue_declare(queue=args.queue_name)
             while True:
                 queue_state = channel.queue_declare(queue=args.queue_name, passive=True)
                 queue_depth_gauge.labels(queue=args.queue_name).set(queue_state.method.message_count)
@@ -249,14 +255,16 @@ def queue_depth_monitor():
 
 # Main function to start multiple threads
 def main():
-    start_http_server(METRICS_PORT)
 
     if not args.no_monitor:
         start_job_monitor_thread()
 
-    monitor_thread = threading.Thread(target=queue_depth_monitor)
-    monitor_thread.daemon = True
-    monitor_thread.start()
+    # this is for testing the functionality of the service up to the point of submitting the jobs
+    if not args.no_k8s:
+        start_http_server(METRICS_PORT)
+        monitor_thread = threading.Thread(target=queue_depth_monitor)
+        monitor_thread.daemon = True
+        monitor_thread.start()
 
     threads = []
 

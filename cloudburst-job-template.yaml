@@ -24,8 +24,6 @@ spec:
           value: "${STORAGE_TYPE}"
         - name: STORAGE_CONTAINER
           value: "${STORAGE_CONTAINER}"
-        - name: STORAGE_PATH
-          value: "${STORAGE_PATH}"
         resources:
           requests:
             memory: "512Mi"

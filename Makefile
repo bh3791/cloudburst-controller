@@ -99,7 +99,10 @@ apply: init-controller apply-policy
 re-apply: delete-controller apply
 
 post-msg:
-	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -storage-path /data -work_item 12346 -count 1
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item 12346 -count 1
+
+post-msg2:
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@localhost:5672 -storage-type network-rsync -storage-container localhost -work_item 12346 -count 1
 
 sql-conn:
 	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb
