@@ -13,6 +13,10 @@ spec:
       labels:
         app: ${CONTAINER_NAME}
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
       - name: ${CONTAINER_NAME}
         image: "${CONTAINER_IMAGE}"
@@ -24,29 +28,22 @@ spec:
           value: "${STORAGE_TYPE}"
         - name: STORAGE_CONTAINER
           value: "${STORAGE_CONTAINER}"
+        - name: MODE_STR
+          value: full
         resources:
           requests:
-            memory: "512Mi"
+            memory: "2048Mi"
             cpu: "500m"
           limits:
-            memory: "512Mi"
+            memory: "2048Mi"
             cpu: "500m"
         volumeMounts:
           - name: ssh-key
-            mountPath: /root/.ssh/id_ed25519
+            mountPath: /home/ubuntu/.ssh/id_ed25519
             subPath: id_ed25519
-            readOnly: true
-          - name: ssh-known-hosts
-            mountPath: /root/.ssh/known_hosts
-            subPath: known_hosts
-            readOnly: true
       volumes:
         - name: ssh-key
           secret:
             secretName: ssh-key
-            defaultMode: 0400
-        - name: ssh-known-hosts
-          secret:
-            secretName: ssh-known-hosts
-            defaultMode: 0444
+            defaultMode: 288 #0440
       restartPolicy: Never  # OnFailure

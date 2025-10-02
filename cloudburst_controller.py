@@ -25,16 +25,16 @@ parser.add_argument(
     dest="broker_url",
     help="The broker to pass in, if not check BROKER_URL env var",
     default=os.getenv("BROKER_URL"))
-parser.add_argument(
-    "-container_name",
-    dest="container_name",
-    help="The name of the container to start",
-    default=os.getenv("CONTAINER_NAME"))
-parser.add_argument(
-    "-container_url",
-    dest="container_url",
-    help="The URL of the container to start",
-    default=os.getenv("CONTAINER_URL"))
+#parser.add_argument(
+#    "-image_name",
+#    dest="image_name",
+#    help="The name of the image to start",
+#    default=os.getenv("IMAGE_NAME"))
+#parser.add_argument(
+#    "-image_url",
+#    dest="image_url",
+#    help="The URL of the image to start",
+#    default=os.getenv("IMAGE_URL"))
 parser.add_argument(
     "-num_threads",
     dest="num_threads",
@@ -141,7 +141,7 @@ def create_kubernetes_job(message):
 
         if name1 == "WORK_ITEM":
             # try to find work_item to identify the job name, make it unique with a timestamp
-            job_name = f"job-cb-{value1}-{int(time.time_ns()/1000)}"
+            job_name = f"job-cb-{value1}-{int(time.time_ns()/1000)}".lower()
             my_vars["JOB_NAME"] = job_name
             if args.debug:
                 print(f"naming job {job_name} based on {name1}")
@@ -152,7 +152,7 @@ def create_kubernetes_job(message):
     # name the job something if it was not already named
     if not b_named:
         for name1, value1 in message.items():
-            job_name = f"job-cb-{value1}-{int(time.time_ns()/1000)}"
+            job_name = f"job-cb-{value1}-{int(time.time_ns()/1000)}".lower()
             my_vars["JOB_NAME"] = job_name
             if args.debug:
                 print(f"naming job {job_name} based on {name1}")

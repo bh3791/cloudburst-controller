@@ -6,7 +6,7 @@ NAMED_VERSION=mini-raptor
 GIT_SHA=$(shell git rev-parse --short HEAD)
 
 K8S_IP=bruce-mint
-STORAGE_IP=bruce-mint #bruce@bruce-m2.local
+STORAGE_IP=bruce@bruce-mint #bruce@bruce-m2.local
 
 #AWS_ID=$(AWS_ID) # your AWS account ID here, if using AWS. Using an ENV variable
 #AWS_REGION=$(AWS_REGION) # your preferred AWS region here, if using AWS. Using an ENV variable
@@ -98,11 +98,14 @@ apply: init-controller apply-policy
 
 re-apply: delete-controller apply
 
+# run cloudburst
 post-msg:
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item 12346 -count 1
 
-post-msg2:
-	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@localhost:5672 -storage-type network-rsync -storage-container localhost -work_item 12346 -count 1
+# run la-haz
+post-msg3:
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00001 -count 1 -image bhdockr/la-haz:latest -container_name la-haz
+
 
 sql-conn:
 	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb
@@ -114,7 +117,7 @@ monitor-ctrl:
 	kubectl logs -l app=cloudburst-controller --follow --max-log-requests 40
 
 monitor-cb:
-	kubectl logs -l app=cloudburst --follow --max-log-requests 40
+	kubectl logs -l app=la-haz --follow --max-log-requests 40
 
 k3s-init:
 	# was: kind create cluster --config deployment/kind-ports.yaml
@@ -123,7 +126,6 @@ k3s-init:
 
 	# the following secrets are used by the cloudburst job template
 	kubectl create secret generic ssh-key --from-file=id_ed25519=$(HOME)/.ssh/id_ed25519
-	kubectl create secret generic ssh-known-hosts --from-file=known_hosts=$(HOME)/.ssh/known_hosts
 
 k3s-delete:
 	sudo /usr/local/bin/k3s-uninstall.sh
