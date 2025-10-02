@@ -11,6 +11,11 @@ parser.add_argument(
     help="The work item to process",
     required=True)
 parser.add_argument(
+    "-mode",
+    dest="mode",
+    help="The mode to run in",
+    default="full")
+parser.add_argument(
     "-count",
     dest="count",
     type=int,
@@ -66,6 +71,7 @@ def main():
         # the following items will be substituted into the cloudburst-job-template.yaml when received
         request = {  # put the identifier element first
             "WORK_ITEM": args.work_item,
+            "MODE_STR": args.mode,
             "JOB_NAMESPACE": args.namespace,
             "CONTAINER_NAME": args.container_name,
             "CONTAINER_IMAGE": args.image,
