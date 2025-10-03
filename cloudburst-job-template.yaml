@@ -33,10 +33,10 @@ spec:
         resources:
           requests:
             memory: "2048Mi"
-            cpu: "500m"
+            cpu: "2"
           limits:
             memory: "2048Mi"
-            cpu: "500m"
+            cpu: "2"
         volumeMounts:
           - name: ssh-key
             mountPath: /home/ubuntu/.ssh/id_ed25519
