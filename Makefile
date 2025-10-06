@@ -104,7 +104,15 @@ post-msg:
 
 # run la-haz
 post-msg3:
-	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00001 -count 1 -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00001 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00002 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00003 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00004 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00005 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00006 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00007 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00008 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00009 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
 
 
 sql-conn:

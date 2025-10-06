@@ -6,7 +6,8 @@ metadata:
   labels:
     app: ${CONTAINER_NAME}
 spec:
-  ttlSecondsAfterFinished: 3600  # Job will be cleaned up 1 hour after completion
+  # for debugging, allow logs to stick around for now.
+#  ttlSecondsAfterFinished: 3600  # Job will be cleaned up 1 hour after completion
   template:
     metadata:
       name: ${CONTAINER_NAME}
