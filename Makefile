@@ -99,6 +99,7 @@ post-msg:
 # run la-haz
 post-msg4:
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00001 -mode post -image bhdockr/la-haz:latest -container_name la-haz
+
 post-msg3:
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00001 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00002 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
@@ -116,8 +117,8 @@ update-configmaps:
 	kubectl create secret generic ssh-key --from-file=id_ed25519=$(HOME)/.ssh/id_ed25519
 
 	# these configmaps are used to reduce the number of docker rebuilds
-	kubectl delete configmap task-config
-	kubectl delete configmap job-template
+	-kubectl delete configmap task-config
+	-kubectl delete configmap job-template
 	kubectl create configmap task-config --from-file=../ucerf3-hazard/tasks.json
 	kubectl create configmap job-template --from-file=cloudburst-job-template.yaml
 
