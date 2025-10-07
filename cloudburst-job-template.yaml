@@ -43,7 +43,7 @@ spec:
             mountPath: /home/ubuntu/.ssh/id_ed25519
             subPath: id_ed25519
           - name: task-config
-            mountPath: /work/tasks.json
+            mountPath: /work/
             readOnly: true
       volumes:
         - name: ssh-key
