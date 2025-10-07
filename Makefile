@@ -112,6 +112,7 @@ post-msg3:
 
 update-configmaps:
 	# the following secrets are used by the cloudburst job template
+	-kubectl delete secret ssh-key
 	kubectl create secret generic ssh-key --from-file=id_ed25519=$(HOME)/.ssh/id_ed25519
 
 	# these configmaps are used to reduce the number of docker rebuilds

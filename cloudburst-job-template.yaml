@@ -39,19 +39,19 @@ spec:
             memory: "2048Mi"
             cpu: "2"
         volumeMounts:
-          - name: ssh-key
-            mountPath: /home/ubuntu/.ssh/id_ed25519
-            subPath: id_ed25519
           - name: task-config
             mountPath: /work/tasks.json
             subPath: tasks.json
             readOnly: true
+          - name: ssh-key
+            mountPath: /home/ubuntu/.ssh/id_ed25519
+            subPath: id_ed25519
       volumes:
+        - name: task-config
+          configMap:
+            name: task-config
         - name: ssh-key
           secret:
             secretName: ssh-key
             defaultMode: 288 #0440
-        - name: task-config
-          configMap:
-            name: task-config
       restartPolicy: Never  # OnFailure
