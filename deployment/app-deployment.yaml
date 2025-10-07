@@ -52,4 +52,3 @@ spec:
         - name: job-template
           configMap:
             name: job-template
-      restartPolicy: Never  # OnFailure
