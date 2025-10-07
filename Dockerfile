@@ -15,7 +15,6 @@ RUN pip install -r requirements.txt
 
 # Copy the application code
 COPY cloudburst_controller.py .
-COPY job_monitor.py .
 
 # copy assets
 COPY cloudburst-job-template.yaml .
