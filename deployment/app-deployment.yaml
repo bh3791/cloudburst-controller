@@ -44,3 +44,12 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "500m"
+          volumeMounts:
+            - name: job-template
+              mountPath: /app/cloudburst-job-template.yaml
+              readOnly: true
+      volumes:
+        - name: job-template
+          configMap:
+            name: job-template
+      restartPolicy: Never  # OnFailure

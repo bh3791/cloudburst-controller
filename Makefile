@@ -67,12 +67,6 @@ init-mq:
 delete-mq:
 	kubectl delete -f deployment/rabbitmq-controller.yaml
 
-init-db:
-	kubectl apply -f deployment/mariadb-deployment.yaml
-
-delete-db:
-	kubectl delete -f deployment/mariadb-deployment.yaml
-
 init-controller:
 	kubectl apply -f deployment/app-deployment.yaml
 	kubectl apply -f deployment/cloudburst-metrics-service.yaml
@@ -103,6 +97,8 @@ post-msg:
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item 12346 -count 1
 
 # run la-haz
+post-msg4:
+	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00001 -mode post -image bhdockr/la-haz:latest -container_name la-haz
 post-msg3:
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00001 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00002 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
@@ -114,17 +110,16 @@ post-msg3:
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00008 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
 	python3 mq_pub.py -queue job1 -broker_url amqp://guest:guest@$(K8S_IP):31672 -storage-type network-rsync -storage-container $(STORAGE_IP) -work_item Site00009 -mode haz -image bhdockr/la-haz:latest -container_name la-haz
 
-
-sql-conn:
-	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb
-
-sql-init:
-	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb < database/job_status.sql
+update-configmaps:
+	kubectl delete configmap task-config
+	kubectl delete configmap job-template
+	kubectl create configmap task-config --from-file=../ucerf3-hazard/tasks.json
+	kubectl create configmap job-template --from-file=cloudburst-job-template.yaml
 
 monitor-ctrl:
 	kubectl logs -l app=cloudburst-controller --follow --max-log-requests 40
 
-monitor-cb:
+monitor-jobs:
 	kubectl logs -l app=la-haz --follow --max-log-requests 40
 
 k3s-init:
@@ -138,7 +133,7 @@ k3s-init:
 k3s-delete:
 	sudo /usr/local/bin/k3s-uninstall.sh
 
-setup: init-prometheus init-mq init-db init-controller apply-policy sql-init
+setup: init-prometheus init-mq init-controller apply-policy
 
 apply-policy:
 	# permissions required for using the kubernetes batch job service

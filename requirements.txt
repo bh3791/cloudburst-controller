@@ -2,5 +2,4 @@ pika
 kubernetes
 argparse
 pyyaml
-mysql-connector-python
 prometheus-client

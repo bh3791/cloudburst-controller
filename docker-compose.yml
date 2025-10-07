@@ -24,6 +24,7 @@ services:
           - CONTAINER_NAME=la-haz
           - CONTAINER_URL=bhdockr/la-haz:latest
         volumes:
-          - ~/.kube/config:/root/.kube/config
+          - ~/.kube/config:/root/.kube/config:ro
+          - cloudburst-job-template.yaml:/app/cloudburst-job-template.yaml:ro
         depends_on:
           - rabbitmq

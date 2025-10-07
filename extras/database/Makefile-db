@@ -1,0 +1,12 @@
+
+init-db:
+	kubectl apply -f deployment/mariadb-deployment.yaml
+
+delete-db:
+	kubectl delete -f deployment/mariadb-deployment.yaml
+
+sql-conn:
+	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb
+
+sql-init:
+	mysql -h $(K8S_IP) -P 30306 -uroot -prootpassword exampledb < database/job_status.sql
