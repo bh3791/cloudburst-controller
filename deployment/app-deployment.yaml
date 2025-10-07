@@ -46,7 +46,8 @@ spec:
               cpu: "500m"
           volumeMounts:
             - name: job-template
-              mountPath: /app/
+              mountPath: /app/cloudburst-job-template.yaml
+              subPath: cloudburst-job-template.yaml
               readOnly: true
       volumes:
         - name: job-template
